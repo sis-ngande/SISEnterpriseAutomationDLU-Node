@@ -14,3 +14,5 @@ export const KEY_PATIENT_FIRST_NAME = 'patientFirstName';
 export const KEY_PATIENT_LAST_NAME = 'patientLastName';
 export const KEY_CASE_SUMMARY_ID = 'caseSummaryID';
 export const KEY_CASE_APPOINTMENT_ID = 'caseAppointmentId';
+export const KEY_DICTIONARY_ITEM_ID = 'dictionaryItemId';
+export const KEY_CREATE_PATIENT_RESPONSE = 'createjustaPatientResp';

@@ -77,6 +77,28 @@ export class WebserviceUtils {
     await this.runWebServiceRequest('', `/UserSession/UserSessionOrg/${orgId}`, 'POST');
   }
 
+  /**
+   * Port of ReUsableWebserviceUtils.getDictionaryDetails(dictionaryName, dictionaryValue)
+   * (ReUsableWebserviceUtils.java L2942-2962). Resolves a dictionary item id
+   * (e.g. Religion="Catholic", Race="Asian", "Anesthesia Type"="General") by
+   * name+value, storing the id in the ResponseCache under Keys.KEY_DICTIONARY_ITEM_ID
+   * for the caller to read back. Returns false if either lookup misses.
+   */
+  async getDictionaryDetails(dictionaryName: string, dictionaryValue: string): Promise<boolean> {
+    const dictListResponse = await this.runWebServiceRequest('', 'Dictionary/v2', 'GET');
+    const dictionaries = Array.isArray(dictListResponse.data) ? dictListResponse.data : JSON.parse(dictListResponse.raw);
+    const dictionary = dictionaries.find((d: { name: string }) => d.name?.toLowerCase() === dictionaryName.toLowerCase());
+    if (!dictionary) return false;
+
+    const itemsResponse = await this.runWebServiceRequest('', `Dictionary/v2/${dictionary.id}/All`, 'GET');
+    const items = Array.isArray(itemsResponse.data) ? itemsResponse.data : JSON.parse(itemsResponse.raw);
+    const item = items.find((i: { value: string }) => i.value?.toLowerCase() === dictionaryValue.toLowerCase());
+    if (!item) return false;
+
+    this.responseCache.put(Keys.KEY_DICTIONARY_ITEM_ID, item.id);
+    return true;
+  }
+
   private getUserSessionOrg(response: unknown, orgName: string): string {
     const arr = Array.isArray(response) ? response : JSON.parse(String(response));
     const childOrgs = arr[0]?.childOrgs ?? [];

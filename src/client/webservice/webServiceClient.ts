@@ -1,9 +1,36 @@
 import { WebserviceUtils } from './webserviceUtils';
 import { ResponseCache } from './responseCache';
 import { SeedData } from '../../seeddata/seedData';
-import { generateRandomNumeric } from '../../utils/reusableUtils';
+import { generateRandomNumeric, addDate } from '../../utils/reusableUtils';
 import * as Keys from './iWebServiceResponseKeys';
 import { updateField } from '../../templates/templateLoader';
+
+export interface CreateJustAPatientParams {
+  firstName: string;
+  lastName: string;
+  dateOfBirth?: string;
+  procedureDt: string;
+  patientGender?: string;
+  religion?: string;
+  ethnicity?: string;
+  race?: string;
+  // The following are supported by the Java original via dedicated
+  // sub-builders (updatePatientAddressDetails, updatePatientAdditionalDetails,
+  // updatePatientPhoneDetails, updatePatientEmergencyContactDetails,
+  // updatePatientEmployerDetails - ReUsableWebserviceUtils.java L5922-6100+)
+  // which are NOT yet ported. Real seed-data rows observed so far leave these
+  // blank, so createJustAPatient throws if any are non-blank rather than
+  // silently dropping that data.
+  patientAddressDetails?: string;
+  patientAdditionalDetails?: string;
+  patientPhoneDetails?: string;
+  patientEmergencyContactDetails?: string;
+  patientEmployerDetails?: string;
+}
+
+function isBlank(v: string | undefined): boolean {
+  return v == null || v.trim() === '' || v.trim().toLowerCase() === 'blank';
+}
 
 /**
  * Port of com.client.webservice.WebServiceClient.
@@ -99,5 +126,74 @@ export class WebServiceClient extends WebserviceUtils {
       roomBody = updateField(roomBody, 'quickCode', roomName);
       await this.runWebServiceRequest(roomBody, '/Room/Add', 'POST');
     }
+  }
+
+  /**
+   * Port of ReUsableWebserviceUtils.createjustApatient (ReUsableWebserviceUtils.java
+   * L420-495). Covers the core patient-creation payload (name, DOB, gender,
+   * ethnicity, religion, race, account number, procedure date); the five
+   * address/contact/additional/employer detail sub-builders are not yet
+   * ported (see CreateJustAPatientParams) and this throws if any of those
+   * fields are populated rather than silently omitting the data.
+   */
+  async createJustAPatient(params: CreateJustAPatientParams): Promise<void> {
+    for (const detailField of [
+      'patientAddressDetails',
+      'patientAdditionalDetails',
+      'patientPhoneDetails',
+      'patientEmergencyContactDetails',
+      'patientEmployerDetails',
+    ] as const) {
+      if (!isBlank(params[detailField])) {
+        throw new Error(
+          `createJustAPatient: ${detailField} is not yet ported (ReUsableWebserviceUtils.java update${detailField[0].toUpperCase()}${detailField.slice(1)} equivalent) - value was "${params[detailField]}"`
+        );
+      }
+    }
+
+    const relURL = '/PatientData/Gemini/CreatePatient/2030';
+    let body = this.templates.load<Record<string, unknown>>('CreatePatient.json');
+
+    const accountNumber = Number(generateRandomNumeric(13));
+    const procedureDt = addDate(params.procedureDt, 'yyyy-MM-dd');
+
+    body = updateField(body, 'firstName', params.firstName);
+    body = updateField(body, 'lastName', params.lastName);
+    if (!isBlank(params.dateOfBirth)) {
+      body = updateField(body, 'dateOfBirth', params.dateOfBirth);
+    }
+    body = updateField(body, 'accountNumber', accountNumber);
+    body = updateField(body, 'procedureDt', `${procedureDt}T00:00:00-0500`);
+    body = updateField(body, 'fullName', `${params.firstName} ${params.lastName}`);
+    body = updateField(body, 'fullNameWithTitle', `${params.firstName} ${params.lastName}`);
+
+    if (!isBlank(params.patientGender)) {
+      body = updateField(body, 'gender', params.patientGender);
+    }
+
+    if (params.ethnicity?.toLowerCase() === 'hispanic') {
+      body = updateField(updateField(body, 'ethnicityId', 1), 'ethnicity', 'Hispanic');
+    } else if (params.ethnicity?.toLowerCase() === 'non-hispanic') {
+      body = updateField(updateField(body, 'ethnicityId', 2), 'ethnicity', 'Non-Hispanic');
+    }
+
+    if (!isBlank(params.religion)) {
+      const found = await this.getDictionaryDetails('Religion', params.religion!);
+      if (found) {
+        body = updateField(updateField(body, 'religionId', this.responseCache.get<number>(Keys.KEY_DICTIONARY_ITEM_ID)), 'religion', params.religion);
+      }
+    }
+
+    if (!isBlank(params.race)) {
+      const found = await this.getDictionaryDetails('Race', params.race!);
+      if (found) {
+        body = updateField(updateField(body, 'raceId', this.responseCache.get<number>(Keys.KEY_DICTIONARY_ITEM_ID)), 'race', params.race);
+      }
+    }
+
+    body = updateField(body, 'middleInitial', 'M');
+
+    const response = await this.runWebServiceRequest(body, relURL, 'POST');
+    this.responseCache.put(Keys.KEY_CREATE_PATIENT_RESPONSE, response.raw);
   }
 }

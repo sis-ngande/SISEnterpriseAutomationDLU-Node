@@ -1,0 +1,30 @@
+ {
+	"patientId": 0,
+	"firstName": "firstname",
+	"lastName": "lastname",
+	"middleInitial": "M",
+	"dateOfBirth": "11/11/1991",
+	"gender": "Male",
+	"accountNumber": 1234567891012,
+	"isPatientExists": false,
+	"isLockExists": false,
+	"fullName": "firsrname lastName",
+	"fullNameWithTitle": "firsrname lastName",
+	"email" : "SISAutomation@sisfirst.com",
+	"procedureDt": "0001-01-01T00:00:00+00:00",
+	"race":"Race 1",
+	"ethnicity":"Hispanic",
+	"mpiPatientAge": {
+		"years": 28,
+		"months": 1,
+		"days": 15
+	},
+	"mpiPatientPhone": {
+    "phoneId": 0,
+    "phoneType": "Home",
+    "primaryContactTf": true,
+    "phoneNumber": "7624995863",
+    "isCellPhoneTf": true
+    }
+	
+}
