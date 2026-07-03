@@ -73,14 +73,10 @@ export class WebServiceSeedDataProcessor {
 
           for (const colNum of spannedColNums) {
             const subColName = this.excelParser.getCellDataByColNum(sheetName, colNum, 2);
-            const testColData = this.excelParser.getCellDataFiltered(
-              sheetName,
-              TEST_CASE_COL_NAME,
-              testCase,
-              colName,
-              subColName,
-              usedRangeRowNum
-            );
+            // usedRangeRowNum already came from getUsedRangeRowNumbers(testCase) above,
+            // so it doesn't need re-deriving/re-validating per subcolumn (that redundant
+            // O(totalRows) recomputation per subcolumn was the main perf bottleneck).
+            const testColData = this.excelParser.getCellDataByColNum(sheetName, colNum, usedRangeRowNum);
             subColParams.set(subColName, testColData ?? '');
           }
 

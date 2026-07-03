@@ -2,9 +2,11 @@ import ExcelJS from 'exceljs';
 import { JSONFileParser } from '../json/jsonFileParser';
 
 interface SheetHeaderCache {
-  /** column name (trimmed) -> 1-based column number, built from header row (row 1) */
+  /** column name (trimmed) -> 1-based column number of the merge's master column, built from header row (row 1) */
   colNameToNum: Map<string, number>;
   headerLastCellNum: number;
+  /** 1-based col -> 1-based master col (same value if the header cell isn't merged) */
+  masterColByCol: number[];
 }
 
 /**
@@ -63,15 +65,27 @@ export class ExcelParser {
     const headerRow = sheet.getRow(1);
     const colNameToNum = new Map<string, number>();
     const lastCellNum = headerRow.cellCount;
+    const masterColByCol: number[] = new Array(lastCellNum + 1).fill(0);
+
+    // Excel merges the master cell's value across the whole merged range in
+    // the raw XML (non-master cells are blank there), but exceljs transparently
+    // resolves cell.value to the master's value for every cell in the merge.
+    // So header-name matching must use merge metadata, not blank-value checks.
+    for (let col = 1; col <= lastCellNum; col++) {
+      const cell = headerRow.getCell(col);
+      const masterCol = cell.isMerged && cell.master ? Number((cell.master as ExcelJS.Cell).col) : col;
+      masterColByCol[col] = masterCol;
+    }
 
     headerRow.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+      if (masterColByCol[colNumber] !== colNumber) return; // only the merge's master column defines the name
       const value = this.cellRawString(cell);
-      if (value) {
+      if (value && !colNameToNum.has(value.trim().toLowerCase())) {
         colNameToNum.set(value.trim().toLowerCase(), colNumber);
       }
     });
 
-    const cache: SheetHeaderCache = { colNameToNum, headerLastCellNum: lastCellNum };
+    const cache: SheetHeaderCache = { colNameToNum, headerLastCellNum: lastCellNum, masterColByCol };
     this.headerCache.set(sheetName, cache);
     return cache;
   }
@@ -104,33 +118,24 @@ export class ExcelParser {
   }
 
   /**
-   * True if the column header at colName has additional spanned sub-columns
-   * to its right (header cell(s) immediately following are blank).
+   * True if the column header at colName is part of a real Excel-merged
+   * header cell spanning more than one column.
    */
   isMergedCell(sheetName: string, colName: string): boolean {
-    const colNum = this.getColNumber(sheetName, colName);
-    const sheet = this.getSheet(sheetName);
-    const headerRow = sheet.getRow(1);
-    const nextCell = headerRow.getCell(colNum + 1);
-    return this.cellRawString(nextCell).trim() === '';
+    return this.getMergedColNumbers(sheetName, colName).length > 1;
   }
 
-  /** 1-based column numbers spanned by colName's group (colName's own column + any blank-header columns after it) */
+  /** 1-based column numbers spanned by colName's merged header group (colName's own column plus any columns merged into it). */
   getMergedColNumbers(sheetName: string, colName: string): number[] {
+    const cache = this.buildHeaderCache(sheetName);
     const colNum = this.getColNumber(sheetName, colName);
-    const columns = [colNum];
-    const sheet = this.getSheet(sheetName);
-    const headerRow = sheet.getRow(1);
-    const lastCol = headerRow.cellCount;
-    for (let i = colNum + 1; i <= lastCol; i++) {
-      const value = this.cellRawString(headerRow.getCell(i)).trim();
-      if (value === '') {
+    const columns: number[] = [];
+    for (let i = 1; i <= cache.headerLastCellNum; i++) {
+      if (cache.masterColByCol[i] === colNum) {
         columns.push(i);
-      } else {
-        break;
       }
     }
-    return columns;
+    return columns.length > 0 ? columns : [colNum];
   }
 
   isColumnEmpty(sheetName: string, colName: string, rowNum: number): boolean {
@@ -176,11 +181,16 @@ export class ExcelParser {
   }
 
   getAllColNames(sheetName: string, afterColName?: string): string[] {
+    const cache = this.buildHeaderCache(sheetName);
     const sheet = this.getSheet(sheetName);
     const headerRow = sheet.getRow(1);
     const startCol = afterColName ? this.getColNumber(sheetName, afterColName) + 1 : 1;
     const names: string[] = [];
     for (let i = startCol; i <= headerRow.cellCount; i++) {
+      // Skip non-master cells of a merged header group - exceljs repeats the
+      // master's text across the whole merge, so without this filter a single
+      // operation spanning N columns would be listed N times.
+      if (cache.masterColByCol[i] !== i) continue;
       const value = this.cellRawString(headerRow.getCell(i)).trim();
       if (value !== '') {
         names.push(value);
