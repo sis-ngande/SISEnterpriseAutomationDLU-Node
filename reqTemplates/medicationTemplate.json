@@ -1,0 +1,42 @@
+{
+  "compoundTf": false,
+  "titratedTf": false,
+  "medicationTemplateItemList": [],
+  "medicationTemplateTitratedInfo": {},
+  "medication": "ciprofloxacin 500 mg tablet",
+  "selectedDispensableDrug": {
+    "dispensableDrugID": 253246,
+    "dispensableDrugDesc": "ciprofloxacin 500 mg tablet",
+    "dispensableGenericID": 9510,
+    "dispensableGenericDesc": "ciprofloxacin HCl 500 mg ORAL tablet",
+    "routeID": 212,
+    "routeDesc": "oral",
+    "medStrength": "500",
+    "medStrengthUnit": "mg",
+    "doseFormID": 308,
+    "doseFormDesc": "tablet",
+    "medRouteDesc": null,
+    "drugNameID": 7428,
+    "drugNameDesc": "ciprofloxacin",
+    "nameTypeCode": 2,
+    "nameTypeCodeDesc": "Generic Name",
+    "statusCode": 1,
+    "statusCodeDesc": "Replaced",
+    "defaultETCID": null,
+    "defaultETCDesc": null
+  },
+  "defaultETCID": null,
+  "defaultETCDesc": null,
+  "dispensableDrugId": 253246,
+  "templateName": "2386_1",
+  "medicationTemplateModuleMapList": [
+    {
+      "moduleId": 1020
+    }
+  ],
+  "medicationTemplateCasePackMapList": [
+    {
+      "casePackId": 1
+    }
+  ]
+}

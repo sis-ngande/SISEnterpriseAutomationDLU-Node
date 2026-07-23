@@ -1,0 +1,15 @@
+{
+    "baseOrderId": null,
+    "physicianOrderId": 185,
+    "departmentId": 1020,
+    "orderType": "TEXT",
+    "medicationOrder": null,
+    "textOrder": {
+        "baseOrderId": null,
+        "textOrderId": null,
+        "text": "order text",
+        "isFocus": false
+    },
+    "approveTf": null,
+    "sortOrder": 0
+}

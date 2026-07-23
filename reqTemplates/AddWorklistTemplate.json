@@ -1,0 +1,34 @@
+{
+    "name": "V29ya2xpc3Qx",
+    "worklistArea": 1,
+    "worklistMappings": [
+        {
+            "worklistId": null,
+            "casePackId": 1,
+            "defaultWorklist": true
+        },
+        {
+            "worklistId": null,
+            "casePackId": 2,
+            "defaultWorklist": false
+        },
+        {
+            "worklistId": null,
+            "casePackId": 3,
+            "defaultWorklist": true
+        },
+        {
+            "worklistId": null,
+            "casePackId": 4,
+            "defaultWorklist": false
+        },
+        {
+            "worklistId": null,
+            "casePackId": 5,
+            "defaultWorklist": false
+        }
+    ],
+    "templateObject": null,
+    "encodedTemplate": "eyJRdWVzdGlvbnMiOltdfQ==",
+    "isEncoded": true
+}

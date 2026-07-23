@@ -1,0 +1,14 @@
+{
+    "relationshipToInsured": "Other Relationship",
+    "firstName": "Testinsurance",
+    "lastName": "Testinsurance",
+    "gender": "Male",
+    "displayName": "SUBINSU12345",
+    "insuranceCarrierId": 2678,
+    "carrier": "ACarrier1936_1",
+    "insuranceId": "2703",
+    "planName": "1936Insurance",
+    "insuranceClaimOfficeId": 2697,
+    "patientId": 53681,
+    "patientInsuranceId": 0
+}

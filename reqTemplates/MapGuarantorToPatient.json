@@ -1,0 +1,18 @@
+{
+    "selectedStateIdx": 40,
+    "selectedCountryIdx": 1,
+    "country": "United States",
+    "firstName": "dasdas",
+    "lastName": "asdasd",
+    "gender": "Male",
+    "dateOfBirth": "01/01/2010",
+    "patientRelationship": "Spouse",
+    "phoneNumber": "2312312312",
+    "address1": "wewerw",
+    "address2": "efwerwee",
+    "city": "Albany",
+    "state": "NY",
+    "zip": "12250-4588",
+    "patientId": "",
+    "isActive": true
+}

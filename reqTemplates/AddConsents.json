@@ -1,0 +1,38 @@
+{
+    "consentConfigurationId": 1644,
+    "consentConfigurationName": "Y29uc2VudFRlc3Q=",
+    "schedulePhysicianTf": true,
+    "scheduleProcedureTf": true,
+    "scheduleDiagnosisTf": true,
+    "expireTf": false,
+    "expireInDays": null,
+    "organizationId": 42,
+    "consentCaseMappings": [
+        {
+            "casePackId": 1,
+            "consentConfigurationId": 1644,
+            "defaultTf": true
+        },
+        {
+            "casePackId": 2,
+            "consentConfigurationId": 1644,
+            "defaultTf": true
+        },
+        {
+            "casePackId": 3,
+            "consentConfigurationId": 1644,
+            "defaultTf": true
+        },
+        {
+            "casePackId": 4,
+            "consentConfigurationId": 1644,
+            "defaultTf": true
+        },
+        {
+            "casePackId": 5,
+            "consentConfigurationId": 1644,
+            "defaultTf": true
+        }
+    ],
+    "consentStatements": []
+}

@@ -1,0 +1,23 @@
+{
+    "opNoteId": 862,
+    "organizationId": 42,
+    "opNoteName": "newopnotes161978",
+    "immediateOpNote": false,
+    "textObject": {
+        "opNoteId": 862,
+        "noteText": "",
+        "sourceIdentifier": "00000000-0000-0000-0000-000000000000"
+    },
+    "variableObject": {
+        "opNoteId": 862,
+        "serializedVariables": "",
+        "variableItems": []
+    },
+    "physicianMappings": [
+        {
+            "staffId": 119
+        }
+    ],
+    "noteType": 0,
+    "sourceIdentifier": "00000000-0000-0000-0000-000000000000"
+}

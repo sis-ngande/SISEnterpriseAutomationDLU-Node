@@ -1,0 +1,24 @@
+{
+  "gem_fmbftr_sc1830": [
+    {
+      "Username1": "gem_user_1830",
+      "BusinessEntity": "Gem_Org008",
+      "PF1": "John",
+      "PL1": "Doe",
+      "gAT": "General"
+    }
+  ],
+  "gem_fmbftr_sc1831": [
+    {
+      "Guarantorfname": "Jane",
+      "Guarantorlname": "Smith",
+      "GuarantorfnameSG": "Janet",
+      "GuarantorlnameSG": "Smithson"
+    }
+  ],
+  "DiagnosisData": [
+    {
+      "CodeH44111": "H44.111"
+    }
+  ]
+}

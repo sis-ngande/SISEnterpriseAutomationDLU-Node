@@ -1,0 +1,13 @@
+{
+  "caseSummaryId": "46803",
+  "casePhysicianOrderId": 0,
+  "caseModuleOrderMaps": [
+    {
+      "moduleId": 1020,
+      "orders": []
+    }
+  ],
+  "name": "Verbal Orders",
+  "isExpanded": true,
+  "orderType": 2
+}

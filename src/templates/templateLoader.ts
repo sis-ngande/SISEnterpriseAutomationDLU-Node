@@ -33,3 +33,42 @@ export function updateField<T extends Record<string, unknown>>(obj: T, key: stri
   obj[key as keyof T] = value as T[keyof T];
   return obj;
 }
+
+function pathTokens(jsonPath: string): (string | number)[] {
+  return (jsonPath.match(/[^.[\]]+/g) ?? []).map((t) => (/^\d+$/.test(t) ? Number(t) : t));
+}
+
+/**
+ * Port of JsonUtils.updateObjectJsonXpath - sets a value at a dotted/bracketed
+ * path (e.g. "patient.address", "caseProcedures[0].cptCode") on a mutable
+ * object graph, mutating obj in place and returning it for chaining.
+ */
+export function setPath<T>(obj: T, jsonPath: string, value: unknown): T {
+  const tokens = pathTokens(jsonPath);
+  let cur: any = obj;
+  for (let i = 0; i < tokens.length - 1; i++) {
+    cur = cur[tokens[i]];
+  }
+  cur[tokens[tokens.length - 1]] = value;
+  return obj;
+}
+
+/** Port of JsonUtils.getObjectFromJsonXpath - reads a value at a dotted/bracketed path. */
+export function getPath(obj: unknown, jsonPath: string): unknown {
+  const tokens = pathTokens(jsonPath);
+  let cur: any = obj;
+  for (const t of tokens) {
+    if (cur == null) return undefined;
+    cur = cur[t];
+  }
+  return cur;
+}
+
+/**
+ * Port of JsonUtils.getJSONObjectFromJSONArray - finds the first element whose fieldName
+ * matches fieldValue. Case-insensitive, matching the Java original's `.equalsIgnoreCase(value)`.
+ */
+export function findByField<T extends Record<string, unknown>>(arr: T[], fieldName: string, fieldValue: string): T | undefined {
+  const target = fieldValue.toLowerCase();
+  return arr.find((item) => String(item[fieldName]).toLowerCase() === target);
+}

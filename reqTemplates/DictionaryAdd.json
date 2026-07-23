@@ -1,0 +1,14 @@
+{
+    "onlyClinical": true,
+    "isAddMode": false,
+    "id": 0,
+    "active": true,
+    "showInClinicalTf": true,
+    "isDuplicateItem": false,
+    "dictionary": "Cancelled Reason",
+    "dictionaryId": 154,
+    "value": "Newtest1519",
+    "needToSave": false,
+    "order": "",
+    "isInEditMode": false
+}

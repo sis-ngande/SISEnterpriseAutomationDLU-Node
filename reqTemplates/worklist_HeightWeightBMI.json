@@ -1,0 +1,7 @@
+{
+    "$type": "Amkai.MasterDomainModel.ModelExtensions.Organization.Worklist.Questions.HeightWeightBMIWorklistQuestion, Amkai.MasterDomainModel",
+    "QuestionType": 5,
+    "DisplayMetric": false,
+    "ShowReview": false,
+    "$IsCompleted": false
+}

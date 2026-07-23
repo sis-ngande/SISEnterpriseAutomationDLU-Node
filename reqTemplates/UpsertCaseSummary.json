@@ -1,0 +1,210 @@
+{
+    "caseEquipments": [],
+    "today": "2020-04-08T11:27:59.150Z",
+    "caseSummaryId": 0,
+    "patient": {
+        "patientId": 50193,
+        "firstName": "firstname1610",
+        "lastName": "lastname1610",
+        "middleInitial": null,
+        "title": null,
+        "dateOfBirth": "1991-11-11T00:00:00Z",
+        "gender": "Male",
+        "accountNumber": "1234567891012",
+        "noKnownDrugAllergyTf": null,
+        "noKnownNonDrugAllergyTf": null,
+        "noKnownLatexAllergyTf": null,
+        "noHomeMedicationTf": null,
+        "email": null,
+        "alias": null,
+        "patientLanguage": null,
+        "maritalStatusId": null,
+        "maritalStatus": null,
+        "raceId": null,
+        "race": null,
+        "ethnicityId": null,
+        "ethnicity": null,
+        "occupation": null,
+        "religionId": null,
+        "religion": null,
+        "medsLastLoaded": null,
+        "patientPhones": null,
+        "mpiPatientPhone": {
+            "phoneId": 0,
+            "patientId": 0,
+            "phoneType": null,
+            "primaryContactTf": false,
+            "phoneNumber": null,
+            "phoneExtension": null,
+            "isCellPhoneTf": false,
+            "sourceIdentifier": "00000000-0000-0000-0000-000000000000"
+        },
+        "mpiPatientPhoneSecondary": {
+            "phoneId": 0,
+            "patientId": 0,
+            "phoneType": null,
+            "primaryContactTf": false,
+            "phoneNumber": null,
+            "phoneExtension": null,
+            "isCellPhoneTf": false,
+            "sourceIdentifier": "00000000-0000-0000-0000-000000000000"
+        },
+        "patientImage": null,
+        "address": {
+            "country": "United States",
+            "line1": "Address",
+            "line2": "address2",
+            "zip": "12345",
+            "state": "NY",
+            "city": "Schenectady",
+            "county": "Schenectady"
+        },
+        "emergencyContact": null,
+        "isPatientExists": false,
+        "employer": null,
+        "lockingUser": null,
+        "isLockExists": false,
+        "ssn": null,
+        "patientGuarantor": null,
+        "fullName": "firstname1610 lastname1610",
+        "fullNameWithTitle": "firstname1610  lastname1610",
+        "procedureDt": "0001-01-01T00:00:00+00:00",
+        "primaryProcedure": null,
+        "mpiPatientAge": {
+            "years": 28,
+            "months": 4,
+            "days": 28
+        },
+        "sourceIdentifier": "00000000-0000-0000-0000-000000000000"
+    },
+    "patientId": 50193,
+    "caseGuarantor": [
+        {
+            "sortOrder": 1,
+            "isActive": true,
+            "patientGuarantor": {
+                "patientGuarantorId": -1,
+                "patientId": 50193,
+                "firstName": "firstname1610",
+                "lastName": "lastname1610",
+                "gender": "Male",
+                "dateOfBirth": "02/02/1991",
+                "address1": "address",
+                "address2": "Address2",
+                "city": "Albany",
+                "state": "NY",
+                "zip": "12205",
+                "patientRelationship": "Self",
+                "country": "United States"
+            },
+            "isSelf": true,
+            "guarantorId": -1
+        },
+        {
+            "sortOrder": 2,
+            "isActive": false,
+            "patientGuarantor": {
+                "selectedStateIdx": 0,
+                "selectedCountryIdx": 0
+            },
+            "guarantorId": null,
+            "isSelf": false
+        }
+    ],
+    "caseInsurances": [
+        {
+            "sortOrder": 0,
+            "patientInsurance": {}
+        },
+        {
+            "sortOrder": 1,
+            "patientInsurance": {}
+        },
+        {
+            "sortOrder": 2,
+            "patientInsurance": {}
+        }
+    ],
+    "caseMSPInsuranceTypeMap": {},
+    "roomId": 108,
+    "roomName": "N_RoomNo_1",
+    "duration": 30,
+    "procedureStartDt": "2020-04-07T20:00:00.000Z",
+    "procedureStopDt": "2020-04-07T20:30:00.000Z",
+    "procedureStartTime": "2020-04-07T20:00:00.000Z",
+    "procedureStopTime": "2020-04-07T20:30:00.000Z",
+    "startTime": "01:30",
+    "endTime": "02:00",
+    "caseProcedures": [
+        {
+            "physicianId": 10,
+            "physician": "sis Gem_user10, Dr",
+            "laterality": null,
+            "lateralityText": null,
+            "preOpDiagnosisCodeId": null,
+            "preOpDiagnosisCode": null,
+            "procedureId": null,
+            "procedureDescription": "STRAPPING ANKLE &/FOOT",
+            "primaryProcedureTf": true,
+            "appointmentId": null,
+            "procedureSequence": 0,
+            "preferenceCardId": null,
+            "feeScheduleId": 7562,
+            "procedureDisplayName": "29540; STRAPPING ANKLE &/FOOT",
+            "isEditable": false,
+            "selfPayTf": false,
+            "workersCompensation": null,
+            "AnesTypeName": null,
+            "casePackName": null,
+            "dummyCPTId": -10,
+            "modifiedProcedureDescription": "29540; STRAPPING ANKLE &/FOOT",
+            "isDisplayTrashIcon": true,
+            "diagnosisList": [],
+            "cptCode": "29540",
+            "feeScheduleList": [],
+            "feeScheduleItem": {
+                "feeScheduleId": 7562,
+                "procedure": "STRAPPING ANKLE &/FOOT",
+                "organizationId": 42,
+                "cptProcedureId": 9777,
+                "cptProcedure": {
+                    "cptProcedureId": 9777,
+                    "cptCode": "29540",
+                    "cptDescription": "STRAPPING ANKLE &/FOOT",
+                    "isHcpcsCode": false,
+                    "sourceIdentifier": "00000000-0000-0000-0000-000000000000"
+                },
+                "modifiedProcedureDescription": "29540; STRAPPING ANKLE &/FOOT",
+                "status": "Billable",
+                "amount": 1000,
+                "effectiveDate": "2020-04-06T00:00:00+00:00",
+                "feeScheduleHistoryId": 12739,
+                "feeScheduleRootId": 399,
+                "activeTf": true,
+                "isIncludeStateReportTf": true,
+                "sourceIdentifier": "00000000-0000-0000-0000-000000000000",
+                "procedureDisplayName": "29540; STRAPPING ANKLE &/FOOT"
+            }
+        }
+    ],
+    "casePreferenceCards": [],
+    "appointmentTypeId": 20,
+    "appointmentTypeName": "Gem_General3",
+    "caseType": 1,
+    "procedureDt": "2020-04-07T20:00:00.000Z",
+    "dateOfService": "04/07/2020",
+    "additionalClaimInfo": {
+        "valueCodes": [],
+        "conditionCodes": [],
+        "occurenceCodes": [],
+        "eciCodes": [],
+        "occurenceSpanCodes": [],
+        "reasonCodes": [],
+        "ubClaimNoteInfo": [],
+        "ubClaimSuppInfo": [],
+        "hcfaClaimNoteInfo": [],
+        "hcfaClaimSuppInfo": [],
+        "hcfaConditionCodes": []
+    },
+    "primaryPhysicianId": 10
+}

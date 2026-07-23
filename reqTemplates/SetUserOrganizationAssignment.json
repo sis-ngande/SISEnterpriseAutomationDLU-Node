@@ -1,0 +1,21 @@
+{
+  "organizationId": 42,
+  "organizationName": "Gem_Org003",
+  "profileLevelId": 1,
+  "profileLevelName": "Administrator",
+  "roleId": null,
+  "roleName": "",
+  "averageCostPerMin": null,
+  "isEditable": true,
+  "staffId": -1,
+  "facilityDesktopViewId": 3,
+  "desktopViewName": "Business",
+  "entityType": 1,
+  "accessToOtherDesktop": true,
+  "isSISOfficeEnabled": true,
+  "isSISChartsEnabled": true,
+  "isSISAnesthesiaEnabled": true,
+  "isSISAdvancedWithSISOffice": false,
+  "isSISAdvancedEnabled": false,
+  "usrId": 19120
+}

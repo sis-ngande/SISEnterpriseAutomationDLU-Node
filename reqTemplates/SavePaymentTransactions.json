@@ -1,0 +1,55 @@
+[
+  {
+    "transaction": {
+      "amount": "100",
+      "isDeleted": false,
+      "isHidden": false,
+      "transactionId": 0,
+      "transactionTypeId": 2,
+      "transactionCodeId": 2643,
+      "writeOffDetails": {
+        "transactionId": 0,
+        "writeoffReasonId": 305,
+        "writeoffGroupId": 3,
+        "writeOffGroupDescription": "",
+        "writeoffReasonDescription": ""
+      },
+      "batchId": 12703,
+      "transactionDate": "2020-05-05T11:40:49.403Z",
+      "transactionParentId": 3792,
+      "transactionRootId": 3792,
+      "postedDate": "2020-05-05T11:42:04.584Z",
+      "chargeDetails": {
+        "peformedCaseProcedureId": 2494,
+        "balance": 1900,
+        "actualBalance": null,
+        "chargeEntryLevelTransactionsAmount": null,
+        "typeOfBill": "0831",
+        "sourceOfRevenueId": null,
+        "selfPay": true,
+        "workersCompensation": false,
+        "revenueCodeId": 248,
+        "revenueCode": "0490",
+        "transactionId": 3792,
+        "deductibleAmount": null,
+        "coInsuranceAmount": null,
+        "coPaymentAmount": null,
+        "billId": null,
+        "corrected": false,
+        "generateBill": true,
+        "generateBillStateModified": false,
+        "patientResponsibilityCoPayments": null,
+        "sourceIdentifier": "00000000-0000-0000-0000-000000000000"
+      },
+      "isPaymentTransfer": false,
+      "receivedFrom": null,
+      "isEditable": false,
+      "createdDate": "2020-05-05T11:42:04.584Z",
+      "paymentDetails": {
+        "transactionId": 0,
+        "paymentTypeId": null
+      }
+    },
+    "toResponsibleParty": {}
+  }
+]

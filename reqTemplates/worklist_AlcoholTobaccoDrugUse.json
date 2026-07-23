@@ -1,0 +1,11 @@
+{
+    "$type": "Amkai.MasterDomainModel.ModelExtensions.Organization.Worklist.Questions.AlcoholTobaccoDrugUseWorklistQuestion, Amkai.MasterDomainModel",
+    "QuestionType": 6,
+    "Response": 0,
+    "Notes": null,
+    "AlcoholConsumption": null,
+    "AlcoholConsumptionId": null,
+    "TobaccoUse": null,
+    "TobaccoUseId": null,
+    "DrugUseList": null
+}

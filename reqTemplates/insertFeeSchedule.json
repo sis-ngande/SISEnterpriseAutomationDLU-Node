@@ -1,0 +1,22 @@
+{
+  "feeScheduleId": 0,
+  "procedure": "MANUAL PREP AND INSERTION DEEP DRUG DELIVERY DEV",
+  "cptProcedureId": 18278,
+  "cptProcedure": {
+    "cptProcedureId": 18278,
+    "cptCode": "20700",
+    "cptDescription": "MANUAL PREP AND INSERTION DEEP DRUG DELIVERY DEV",
+    "isHcpcsCode": false,
+    "sourceIdentifier": "00000000-0000-0000-0000-000000000000",
+    "procedureDisplayName": "20700; MANUAL PREP AND INSERTION DEEP DRUG DELIVERY DEV"
+  },
+  "procedureDisplayName": "20700; MANUAL PREP AND INSERTION DEEP DRUG DELIVERY DEV",
+  "modifiedProcedureDescription": null,
+  "status": null,
+  "amount": null,
+  "effectiveDate": null,
+  "feeScheduleHistoryId": 0,
+  "feeScheduleRootId": 0,
+  "activeTf": true,
+  "isIncludeStateReportTf": true
+}

@@ -1,0 +1,14 @@
+{
+    "areaofCareStaffEntryDetails": [
+        {
+            "staffId": 30,
+            "staffRoleId": 13,
+            "inTimeDt": "2020-04-16T02:30:00.000Z"
+        }
+    ],
+    "isUpdateAllTransferDt": true,
+    "isUpdateAllAdmissionDt": true,
+    "caseSummaryId": "51830",
+    "moduleId": 1060,
+    "isCopyPreviousStaff": true
+}

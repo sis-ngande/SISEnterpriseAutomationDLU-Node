@@ -1,0 +1,67 @@
+{
+  "performedItems": [
+    {
+      "feeScheduleItem": {
+        "feeScheduleId": 6405,
+        "procedure": "ARTHROSCOPY ELBOW SURGICAL SYNOVECTOMY PARTIAL",
+        "organizationId": 42,
+        "cptProcedureId": 9807,
+        "cptProcedure": null,
+        "modifiedProcedureDescription": "29835; ARTHROSCOPY ELBOW SURGICAL SYNOVECTOMY PARTIAL",
+        "status": "Billable",
+        "amount": 2000,
+        "effectiveDate": "2020-03-24T00:00:00+00:00",
+        "feeScheduleHistoryId": 11158,
+        "feeScheduleRootId": 403,
+        "activeTf": true,
+        "isIncludeStateReportTf": true
+      },
+      "unableToCode": false,
+      "panelCollapsed": false,
+      "primaryInsurancesList": [],
+      "secondaryInsurancesList": [],
+      "tertiaryInsurancesList": [],
+      "controlsModifiedInEditChargeMode": false,
+      "fullChargeCorrectionRequired": false,
+      "generateBillStateModified": false,
+      "performedCaseSupply": {},
+      "selectedSupplyToInventory": null,
+      "isReadOnlyPeriodBatch": false,
+      "resetClosedPeriodBatch": false,
+      "isNewProcedureAdded": false,
+      "isAmountChanged": false,
+      "insuranceModification": 0,
+      "guarantorModification": 0,
+      "isGCode": false,
+      "isCombinedCodingChargeEntry": false,
+      "isCorrected": false,
+      "units": 1,
+      "performedCaseItemTypeId": 0,
+      "sortorder": 0,
+      "hovered": false,
+      "diagnosisList": [
+        {
+          "dictionaryItem": {
+            "onlyClinical": true,
+            "id": 7249,
+            "quickCode": "H44.001",
+            "value": "Unspecified purulent endophthalmitis, right eye"
+          },
+          "diagnosisId": 7249,
+          "sortOrder": 0
+        }
+      ],
+      "caseSummaryId": 38784,
+      "caseProcedureId": 3534,
+      "cptProcedureId": 9807,
+      "cptCode": "29835",
+      "cptProcedureDescription": "ARTHROSCOPY ELBOW SURGICAL SYNOVECTOMY PARTIAL",
+      "providerId": 38,
+      "physicianName": "sis Physician, Dr",
+      "feeScheduleId": 6405,
+      "generateBill": false,
+      "billingProcedureDescription":"Added through ART"
+    }
+  ],
+  "deletedPerformedItems": []
+}

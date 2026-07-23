@@ -1,20 +1,40 @@
-import path from 'path';
-import { WebServiceSeedDataProcessor } from './seeddata/webServiceSeedDataProcessor';
-import { SEED_DATA_TYPE_LONG_TERM } from './seeddata/iSeedDataProcessor';
+import { runAutomation, DEFAULT_EXCEL_PATH, TagResult } from './runner';
+
+const SEED_DATA_TYPES = ['All'];
+
+function printTimingTable(results: TagResult[]) {
+  const rows = results.map((r) => ({
+    Tag: r.tag,
+    Rows: r.rows,
+    OK: r.okCount,
+    Failed: r.failCount,
+    Patients: r.patientCount,
+    'Time (s)': (r.durationMs / 1000).toFixed(2),
+  }));
+
+  const totalMs = results.reduce((sum, r) => sum + r.durationMs, 0);
+  console.log('\n=== Per-tag timing ===');
+  console.table(rows);
+  console.log(`Total time across all tags: ${(totalMs / 1000).toFixed(2)}s`);
+}
 
 async function main() {
-  const excelPath = process.argv[2] ?? path.resolve(__dirname, '../seedData/seedData.xlsx');
+  const excelPath = process.argv[2] ?? DEFAULT_EXCEL_PATH;
   const jsonPath = process.argv[3];
+  const baseUrl = process.env.BASE_URL;
 
-  const processor = await WebServiceSeedDataProcessor.create(excelPath, jsonPath);
-  const seedData = await processor.getAllSeedDataForType(SEED_DATA_TYPE_LONG_TERM);
-
-  console.log(`Parsed ${seedData.length} seed-data rows from ${excelPath}`);
-  for (const sd of seedData.slice(0, 5)) {
-    console.log(JSON.stringify({ testCase: sd.testCase, rowNumber: sd.rowNumber, operations: Object.fromEntries(
-      Array.from(sd.operations.entries()).map(([op, params]) => [op, Object.fromEntries(params)])
-    ) }, null, 2));
+  if (!baseUrl) {
+    console.error('BASE_URL environment variable is required (e.g. BASE_URL=https://... npx ts-node src/index.ts).');
+    console.error('Alternatively, use the web UI (npm run web) to set the URL and Tag without env vars.');
+    process.exit(1);
   }
+
+  const results: TagResult[] = [];
+  for (const tag of SEED_DATA_TYPES) {
+    results.push(await runAutomation({ baseUrl, tag, excelPath, jsonPath }));
+  }
+
+  printTimingTable(results);
 }
 
 main().catch((err) => {

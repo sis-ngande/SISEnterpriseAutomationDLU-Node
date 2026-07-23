@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>SeedForge</title>
+<style>
+  :root {
+    --indigo: #4f46e5;
+    --indigo-dark: #4338ca;
+    --orange: #f97316;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+    --field-bg: #f3f4f6;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Segoe UI", Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 32px 40px 60px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .logo-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--indigo), var(--orange));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; color: white; flex-shrink: 0;
+  }
+  .brand h1 { margin: 0; font-size: 22px; font-weight: 700; }
+  .brand h1 .seed { color: var(--indigo); }
+  .brand h1 .forge { color: var(--orange); }
+  .brand .subtitle { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 24px 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 28px;
+  }
+  .card h2 { margin: 0 0 18px; font-size: 15px; font-weight: 700; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  .field label { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 6px; }
+  .field input {
+    width: 100%; padding: 10px 12px; font-size: 14px; border: 1px solid var(--border);
+    border-radius: 8px; background: var(--field-bg); color: var(--text);
+  }
+  .field input:focus { outline: none; border-color: var(--indigo); background: white; }
+
+  button.primary {
+    padding: 11px 22px; font-size: 14px; font-weight: 600; border: none; border-radius: 8px;
+    background: var(--indigo); color: white; cursor: pointer;
+  }
+  button.primary:hover:not(:disabled) { background: var(--indigo-dark); }
+  button.primary:disabled { background: #a5b4fc; cursor: not-allowed; }
+
+  .helper { margin-top: 12px; font-size: 12.5px; color: var(--muted); }
+
+  .stat-row { display: flex; gap: 28px; margin: 18px 0 0; }
+  .stat b { display: block; font-size: 20px; }
+  .stat span { font-size: 12px; color: var(--muted); }
+
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; }
+  .state-idle { background: #f1f5f9; color: #475569; }
+  .state-running { background: #fef9c3; color: #854d0e; }
+  .state-done { background: #dcfce7; color: #166534; }
+  .state-error { background: #fee2e2; color: #991b1b; }
+
+  .failure-panel {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 18px; margin: 0 0 20px; display: none;
+  }
+  .failure-panel.visible { display: block; }
+  .failure-panel .title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 8px; }
+  .failure-panel .row { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding: 3px 0; }
+  .failure-panel .row .msg { color: var(--text); }
+  .failure-panel .row .count { color: #991b1b; font-weight: 700; flex-shrink: 0; }
+
+  .log-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .log-header .title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+  .log-header .total { font-size: 13px; color: var(--muted); }
+
+  .log-box { background: #0b1021; border-radius: 12px; overflow: hidden; border: 1px solid #1e2540; }
+  .log-toolbar { display: flex; align-items: center; gap: 14px; padding: 10px 14px; border-bottom: 1px solid #1e2540; }
+  .log-toolbar input[type=text] {
+    flex: 1; padding: 7px 10px; font-size: 12.5px; border-radius: 6px; border: 1px solid #2a3358;
+    background: #131a33; color: #d6e0ff;
+  }
+  .log-toolbar input[type=text]::placeholder { color: #6b7699; }
+  .log-toolbar label { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #9aa4c7; white-space: nowrap; }
+  .log-toolbar button.copy {
+    padding: 6px 12px; font-size: 12.5px; font-weight: 600; border-radius: 6px; border: 1px solid #2a3358;
+    background: #131a33; color: #d6e0ff; cursor: pointer; white-space: nowrap;
+  }
+  .log-toolbar button.copy:hover { background: #1b2448; }
+
+  #log {
+    color: #d6e0ff; font-family: Consolas, Menlo, monospace; font-size: 12.5px;
+    padding: 12px 14px; height: 400px; overflow-y: auto; white-space: pre-wrap;
+  }
+  #log .line { padding: 1px 0; }
+  #log .line.hidden { display: none; }
+  .ok { color: #86efac; }
+  .fail { color: #fca5a5; }
+  .wave { color: #93c5fd; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="brand">
+      <div class="logo-icon">&#9889;</div>
+      <div>
+        <h1><span class="seed">Seed</span><span class="forge">Forge</span></h1>
+        <div class="subtitle">Data Seeder Interface</div>
+      </div>
+    </div>
+    <span id="status" class="badge state-idle">Idle</span>
+  </div>
+
+  <div class="card">
+    <h2>Run Configuration</h2>
+    <form id="runForm">
+      <div class="grid">
+        <div class="field">
+          <label for="url">Target API URL</label>
+          <input type="text" id="url" list="recentUrls" placeholder="https://sisenterprise-api-XXXXXX-centralindia.siscompletedev.cloud/XXXXXXt1/api" required />
+          <datalist id="recentUrls"></datalist>
+        </div>
+        <div class="field">
+          <label for="tag">Tag</label>
+          <input type="text" id="tag" value="All" required />
+        </div>
+      </div>
+      <button type="submit" class="primary" id="runBtn">Run</button>
+    </form>
+    <div class="helper">Rows sharing a TestCase run sequentially; different TestCases run concurrently in waves.</div>
+
+    <div class="stat-row">
+      <div class="stat"><b id="okCount">0</b><span>OK</span></div>
+      <div class="stat"><b id="failCount">0</b><span>Fail</span></div>
+      <div class="stat"><b id="patientCount">0</b><span>Patients</span></div>
+      <div class="stat"><b id="waveInfo">-</b><span>Wave</span></div>
+      <div class="stat"><b id="elapsedTime">-</b><span>Elapsed</span></div>
+    </div>
+  </div>
+
+  <div class="failure-panel" id="failurePanel">
+    <div class="title">Failure Breakdown</div>
+    <div id="failureList"></div>
+  </div>
+
+  <div class="log-header">
+    <span class="title">Output Log</span>
+    <span class="total" id="totalTime">Total: 0.00s</span>
+  </div>
+  <div class="log-box">
+    <div class="log-toolbar">
+      <input type="text" id="filterInput" placeholder="Filter by testCase/status" />
+      <label><input type="checkbox" id="autoScroll" checked /> Auto-scroll</label>
+      <button type="button" class="copy" id="copyLogBtn">Copy</button>
+    </div>
+    <div id="log"></div>
+  </div>
+
+</div>
+
+<script>
+  const form = document.getElementById('runForm');
+  const runBtn = document.getElementById('runBtn');
+  const statusEl = document.getElementById('status');
+  const logEl = document.getElementById('log');
+  const okCountEl = document.getElementById('okCount');
+  const failCountEl = document.getElementById('failCount');
+  const patientCountEl = document.getElementById('patientCount');
+  const waveInfoEl = document.getElementById('waveInfo');
+  const totalTimeEl = document.getElementById('totalTime');
+  const filterInput = document.getElementById('filterInput');
+  const autoScrollBox = document.getElementById('autoScroll');
+  const copyLogBtn = document.getElementById('copyLogBtn');
+  const urlInput = document.getElementById('url');
+  const recentUrlsDatalist = document.getElementById('recentUrls');
+  const failurePanel = document.getElementById('failurePanel');
+  const failureListEl = document.getElementById('failureList');
+  const elapsedTimeEl = document.getElementById('elapsedTime');
+
+  let elapsedTimerId = null;
+
+  function formatElapsed(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    const pad = (n) => String(n).padStart(2, '0');
+    return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+  }
+
+  function startElapsedTimer(startedAt) {
+    stopElapsedTimer();
+    elapsedTimeEl.textContent = formatElapsed(Date.now() - startedAt);
+    elapsedTimerId = setInterval(() => {
+      elapsedTimeEl.textContent = formatElapsed(Date.now() - startedAt);
+    }, 1000);
+  }
+
+  function stopElapsedTimer() {
+    if (elapsedTimerId != null) {
+      clearInterval(elapsedTimerId);
+      elapsedTimerId = null;
+    }
+  }
+
+  let okCount = 0, failCount = 0, patientCount = 0;
+  let failureCounts = new Map();
+
+  const RECENT_URLS_KEY = 'seedforge.recentUrls';
+
+  function loadRecentUrls() {
+    try {
+      return JSON.parse(localStorage.getItem(RECENT_URLS_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  function renderRecentUrls(urls) {
+    recentUrlsDatalist.innerHTML = '';
+    for (const u of urls) {
+      const opt = document.createElement('option');
+      opt.value = u;
+      recentUrlsDatalist.appendChild(opt);
+    }
+  }
+
+  function saveRecentUrl(url) {
+    const urls = [url, ...loadRecentUrls().filter((u) => u !== url)].slice(0, 8);
+    localStorage.setItem(RECENT_URLS_KEY, JSON.stringify(urls));
+    renderRecentUrls(urls);
+  }
+
+  renderRecentUrls(loadRecentUrls());
+
+  function normalizeFailureMessage(msg) {
+    return (msg || '(no message)').replace(/"[^"]*"/g, '"X"').replace(/\d+/g, 'N');
+  }
+
+  function renderFailureBreakdown() {
+    if (failureCounts.size === 0) {
+      failurePanel.classList.remove('visible');
+      return;
+    }
+    failurePanel.classList.add('visible');
+    const sorted = Array.from(failureCounts.entries()).sort((a, b) => b[1] - a[1]);
+    failureListEl.innerHTML = '';
+    for (const [msg, count] of sorted) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      const msgSpan = document.createElement('span');
+      msgSpan.className = 'msg';
+      msgSpan.textContent = msg;
+      const countSpan = document.createElement('span');
+      countSpan.className = 'count';
+      countSpan.textContent = count;
+      row.appendChild(msgSpan);
+      row.appendChild(countSpan);
+      failureListEl.appendChild(row);
+    }
+  }
+
+  function appendLog(text, cls) {
+    const line = document.createElement('div');
+    line.className = 'line' + (cls ? ' ' + cls : '');
+    line.textContent = text;
+    if (filterInput.value && !text.toLowerCase().includes(filterInput.value.toLowerCase())) {
+      line.classList.add('hidden');
+    }
+    logEl.appendChild(line);
+    if (autoScrollBox.checked) logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  filterInput.addEventListener('input', () => {
+    const q = filterInput.value.toLowerCase();
+    for (const line of logEl.querySelectorAll('.line')) {
+      line.classList.toggle('hidden', q.length > 0 && !line.textContent.toLowerCase().includes(q));
+    }
+  });
+
+  copyLogBtn.addEventListener('click', async () => {
+    const text = Array.from(logEl.querySelectorAll('.line')).map((line) => line.textContent).join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      const original = copyLogBtn.textContent;
+      copyLogBtn.textContent = 'Copied!';
+      setTimeout(() => { copyLogBtn.textContent = original; }, 1500);
+    } catch {
+      copyLogBtn.textContent = 'Copy failed';
+      setTimeout(() => { copyLogBtn.textContent = 'Copy'; }, 1500);
+    }
+  });
+
+  function setState(state, error) {
+    statusEl.className = 'badge state-' + state;
+    statusEl.textContent = state === 'error' ? ('Error: ' + (error || 'unknown')) : (state.charAt(0).toUpperCase() + state.slice(1));
+    runBtn.disabled = state === 'running';
+  }
+
+  const es = new EventSource('/api/events');
+  es.onmessage = (msg) => {
+    const event = JSON.parse(msg.data);
+    switch (event.type) {
+      case 'state':
+        setState(event.state, event.error);
+        break;
+      case 'parsed':
+        appendLog(`Parsed ${event.totalRows} rows into ${event.totalGroups} testCase group(s)`, 'wave');
+        startElapsedTimer(event.startedAt);
+        break;
+      case 'waveStart':
+        waveInfoEl.textContent = `${event.waveNum}/${event.totalWaves}`;
+        appendLog(`-- Wave ${event.waveNum}/${event.totalWaves}: ${event.groups} group(s), ${event.rows} row(s) --`, 'wave');
+        break;
+      case 'row':
+        if (event.result === 'ok') {
+          okCount++;
+          if (event.isPatient) patientCount++;
+          appendLog(`[OK] ${event.testCase} row=${event.rowNumber}`, 'ok');
+        } else {
+          failCount++;
+          appendLog(`[FAIL] ${event.testCase} row=${event.rowNumber}: ${event.message || ''}`, 'fail');
+          const key = normalizeFailureMessage(event.message);
+          failureCounts.set(key, (failureCounts.get(key) || 0) + 1);
+          renderFailureBreakdown();
+        }
+        okCountEl.textContent = okCount;
+        failCountEl.textContent = failCount;
+        patientCountEl.textContent = patientCount;
+        break;
+      case 'waveDone':
+        appendLog(`-- Wave ${event.waveNum} done: ${event.ok} ok / ${event.fail} fail --`, 'wave');
+        break;
+      case 'summary':
+        appendLog(`Summary: ${event.okCount} ok, ${event.failCount} failed, ${event.patientCount} patients, ${(event.durationMs/1000).toFixed(2)}s`, 'wave');
+        totalTimeEl.textContent = `Total: ${(event.durationMs/1000).toFixed(2)}s`;
+        stopElapsedTimer();
+        elapsedTimeEl.textContent = formatElapsed(event.durationMs);
+        break;
+    }
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    okCount = 0; failCount = 0; patientCount = 0;
+    okCountEl.textContent = '0'; failCountEl.textContent = '0'; patientCountEl.textContent = '0'; waveInfoEl.textContent = '-';
+    totalTimeEl.textContent = 'Total: 0.00s';
+    stopElapsedTimer();
+    elapsedTimeEl.textContent = '-';
+    logEl.innerHTML = '';
+    failureCounts = new Map();
+    renderFailureBreakdown();
+
+    const url = urlInput.value.trim();
+    const tag = document.getElementById('tag').value.trim();
+
+    const res = await fetch('/api/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ baseUrl: url, tag }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      appendLog('Error: ' + (data.error || 'failed to start'), 'fail');
+    } else {
+      saveRecentUrl(url);
+    }
+  });
+</script>
+</body>
+</html>

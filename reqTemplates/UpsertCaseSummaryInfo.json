@@ -1,0 +1,18 @@
+{
+    "caseSummaryId": 51830,
+    "acuteChronicTf": true,
+    "note": "",
+    "created": "2020-04-16T08:00:86+05:30",
+    "status": "10",
+    "statusAtDischarge": "10",
+    "cancelCaseReason": null,
+    "cancelCaseReasonId": null,
+    "cancelDate": null,
+    "previousStatus": "04",
+    "appointmentId": 6099,
+    "isDepleted": null,
+    "isDocumented": null,
+    "unableToCode": null,
+    "unableToCodeReason": null,
+    "caseType": "1"
+}

@@ -1,0 +1,6 @@
+{
+    "$type": "Amkai.MasterDomainModel.ModelExtensions.Organization.Worklist.Questions.ImplantsProsthesisWorklistQuestion, Amkai.MasterDomainModel",
+    "QuestionType": 24,
+    "$IsCompleted": false,
+    "ImplantsProsthesisList": []
+}

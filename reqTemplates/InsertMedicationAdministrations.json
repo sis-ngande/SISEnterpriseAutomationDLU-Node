@@ -1,0 +1,23 @@
+[
+    {
+        "isNeedToSave": false,
+        "dose": null,
+        "route": null,
+        "unit": "mg",
+        "site": null,
+        "routeId": null,
+        "unitId": 429,
+        "siteId": null,
+        "date": "05/11/2020",
+        "previousServerDate": "05/11/2020",
+        "time": "15:38:47",
+        "previousServerTime": "15:38",
+        "chartedById": 3,
+        "chartedBy": "sis Gem_user3, Dr",
+        "administeredById": 30,
+        "administeredBy": "sis  Gem_user3, Dr",
+        "medicationId": 2551,
+        "dateTime": "2020-05-11T15:38:47+05:30",
+        "medicationAdministrationId": 0
+    }
+]

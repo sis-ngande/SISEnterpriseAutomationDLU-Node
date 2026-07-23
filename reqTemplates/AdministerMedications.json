@@ -1,0 +1,18 @@
+{
+  "dose": "22",
+  "unit": "mg",
+  "route": null,
+  "site": null,
+  "dateTime": "2020-07-05T10:06:14.966Z",
+  "chartedById": 3,
+  "administeredById": 108,
+  "chartedBy": "sis  Gem_user3, Dr",
+  "administeredBy": "sis  Gem_user10, Dr",
+  "caseBaseOrderId": 4769,
+  "medicationAdministrationId": null,
+  "date": "07-05-2020",
+  "time": "15:36:14",
+  "previousServerDate": null,
+  "previousServerTime": null,
+  "medicationAdminId": 0
+}

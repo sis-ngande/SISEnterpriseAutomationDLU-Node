@@ -1,0 +1,19 @@
+{
+  "$type": "Amkai.MasterDomainModel.ModelExtensions.Organization.Worklist.Questions.CaseDetailsWorklistQuestion, Amkai.MasterDomainModel",
+  "QuestionType": 18,
+  "Response": 0,
+  "Notes": null,
+  "ASA": 0,
+  "IsEmergency": false,
+  "Procedure": null,
+  "ProceduresUpdateDate": "0001-01-01T00:00:00+00:00",
+  "PreOpDiagnosis": null,
+  "PreopDiagnosesUpdateDate": "0001-01-01T00:00:00+00:00",
+  "PostOpDiagnosis": null,
+  "AnesthesiaType": null,
+  "AnesthesiaTypeText": "",
+  "DictionaryItems": null,
+  "DisplayASA": false,
+  "DisplayAnesType": false,
+  "HidePostOpDiagnosis": false
+}

@@ -1,0 +1,24 @@
+{
+  "opNoteId": 1684,
+  "caseSummaryId": "46809",
+  "opNoteName": "Op_Notes_2452_1",
+  "signedBy": null,
+  "signedDateTime": null,
+  "signedUser": "",
+  "percentageCompleted": 100,
+  "images": [],
+  "addendums": [],
+  "immediateOpNote": null,
+  "noteType": 0,
+  "textObject": {
+    "opNoteId": 1684,
+    "noteText": "PHA+T3BfTm90ZXNfMjQ1Ml8xPC9wPgo="
+  },
+  "variableObject": {
+    "opNoteId": 1684,
+    "serializedVariables": "W10=",
+    "variableItems": []
+  },
+  "sourceIdentifier": "00000000-0000-0000-0000-000000000000",
+  "isLocked": false
+}
