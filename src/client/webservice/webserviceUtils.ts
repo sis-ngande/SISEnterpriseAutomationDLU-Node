@@ -58,6 +58,7 @@ export class WebserviceUtils {
 
   private static readonly DEFAULT_TRANSIENT_ERROR = /\(status 500\)/;
   private static readonly BLANK_400_ERROR = /\(status 400\) body=\{"message":""\}/;
+  private static readonly DUPLICATE_KEY_CONFLICT = /\(status 409\) body=Duplicate Key Conflict/;
 
   /**
    * Wraps runWebServiceRequest with a short retry for transient failures under
@@ -75,7 +76,10 @@ export class WebserviceUtils {
   ): Promise<WebServiceCallResult> {
     const isTransient =
       options?.isTransient ??
-      ((message: string) => WebserviceUtils.DEFAULT_TRANSIENT_ERROR.test(message) || WebserviceUtils.BLANK_400_ERROR.test(message));
+      ((message: string) =>
+        WebserviceUtils.DEFAULT_TRANSIENT_ERROR.test(message) ||
+        WebserviceUtils.BLANK_400_ERROR.test(message) ||
+        WebserviceUtils.DUPLICATE_KEY_CONFLICT.test(message));
     return this.retryOnTransientError(() => this.runWebServiceRequest(payload, endPoint, method), isTransient, options?.maxAttempts);
   }
 
@@ -682,7 +686,7 @@ export class WebserviceUtils {
 
   /** Port of ReUsableWebserviceUtils.addNewOrder (POST to the given relURL). Caches physicianOrderId under Keys.KEY_PHYSICIAN_ORDER_ID. */
   protected async addNewOrder(name: string, relUrl: string): Promise<void> {
-    const response = await this.runWebServiceRequest({ name }, relUrl, 'POST');
+    const response = await this.runWebServiceRequestWithRetryOnTransientFailure({ name }, relUrl, 'POST');
     const parsed = JSON.parse(response.raw);
     this.responseCache.put(Keys.KEY_PHYSICIAN_ORDER_ID, parsed.physicianOrderId);
   }
@@ -1115,7 +1119,11 @@ export class WebserviceUtils {
 
   /** Port of ReUsableWebserviceUtils.addAnesthesiaBlockNote (/RegionalAnesthesiaTemplate/Add, POST). Returns the new blockNoteId. */
   protected async addAnesthesiaBlockNote(blockNote: string): Promise<number> {
-    const response = await this.runWebServiceRequest({ opNoteName: blockNote }, '/RegionalAnesthesiaTemplate/Add', 'POST');
+    const response = await this.runWebServiceRequestWithRetryOnTransientFailure(
+      { opNoteName: blockNote },
+      '/RegionalAnesthesiaTemplate/Add',
+      'POST'
+    );
     return Number(response.raw);
   }
 

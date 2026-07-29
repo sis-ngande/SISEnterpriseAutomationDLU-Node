@@ -59,6 +59,21 @@
   .stat b { display: block; font-size: 20px; }
   .stat span { font-size: 12px; color: var(--muted); }
 
+  .progress-wrap { margin: 18px 0 0; display: none; }
+  .progress-wrap.visible { display: block; }
+  .progress-labels { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-bottom: 6px; }
+  .progress-labels .pct { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+  .progress-track {
+    height: 10px; border-radius: 999px; background: var(--field-bg); overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress-fill {
+    height: 100%; width: 0%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--indigo), var(--orange));
+    transition: width 0.35s ease;
+  }
+  .progress-fill.error { background: #ef4444; }
+
   .badge { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; }
   .state-idle { background: #f1f5f9; color: #475569; }
   .state-running { background: #fef9c3; color: #854d0e; }
@@ -143,6 +158,16 @@
       <div class="stat"><b id="waveInfo">-</b><span>Wave</span></div>
       <div class="stat"><b id="elapsedTime">-</b><span>Elapsed</span></div>
     </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-labels">
+        <span id="progressRows">0 / 0 rows</span>
+        <span class="pct" id="progressPct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
   </div>
 
   <div class="failure-panel" id="failurePanel">
@@ -183,6 +208,20 @@
   const failurePanel = document.getElementById('failurePanel');
   const failureListEl = document.getElementById('failureList');
   const elapsedTimeEl = document.getElementById('elapsedTime');
+  const progressWrapEl = document.getElementById('progressWrap');
+  const progressFillEl = document.getElementById('progressFill');
+  const progressPctEl = document.getElementById('progressPct');
+  const progressRowsEl = document.getElementById('progressRows');
+
+  let totalRows = 0;
+  let completedRows = 0;
+
+  function updateProgress() {
+    const pct = totalRows > 0 ? Math.min(100, Math.round((completedRows / totalRows) * 100)) : 0;
+    progressFillEl.style.width = pct + '%';
+    progressPctEl.textContent = pct + '%';
+    progressRowsEl.textContent = `${completedRows} / ${totalRows} rows`;
+  }
 
   let elapsedTimerId = null;
 
@@ -302,6 +341,7 @@
     statusEl.className = 'badge state-' + state;
     statusEl.textContent = state === 'error' ? ('Error: ' + (error || 'unknown')) : (state.charAt(0).toUpperCase() + state.slice(1));
     runBtn.disabled = state === 'running';
+    progressFillEl.classList.toggle('error', state === 'error');
   }
 
   const es = new EventSource('/api/events');
@@ -314,6 +354,11 @@
       case 'parsed':
         appendLog(`Parsed ${event.totalRows} rows into ${event.totalGroups} testCase group(s)`, 'wave');
         startElapsedTimer(event.startedAt);
+        totalRows = event.totalRows;
+        completedRows = 0;
+        progressFillEl.classList.remove('error');
+        progressWrapEl.classList.add('visible');
+        updateProgress();
         break;
       case 'waveStart':
         waveInfoEl.textContent = `${event.waveNum}/${event.totalWaves}`;
@@ -334,6 +379,8 @@
         okCountEl.textContent = okCount;
         failCountEl.textContent = failCount;
         patientCountEl.textContent = patientCount;
+        completedRows++;
+        updateProgress();
         break;
       case 'waveDone':
         appendLog(`-- Wave ${event.waveNum} done: ${event.ok} ok / ${event.fail} fail --`, 'wave');
@@ -343,6 +390,8 @@
         totalTimeEl.textContent = `Total: ${(event.durationMs/1000).toFixed(2)}s`;
         stopElapsedTimer();
         elapsedTimeEl.textContent = formatElapsed(event.durationMs);
+        completedRows = totalRows;
+        updateProgress();
         break;
     }
   };
@@ -357,6 +406,11 @@
     logEl.innerHTML = '';
     failureCounts = new Map();
     renderFailureBreakdown();
+    totalRows = 0;
+    completedRows = 0;
+    progressFillEl.classList.remove('error');
+    progressWrapEl.classList.remove('visible');
+    updateProgress();
 
     const url = urlInput.value.trim();
     const tag = document.getElementById('tag').value.trim();

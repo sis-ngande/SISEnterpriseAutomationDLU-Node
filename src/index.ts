@@ -29,9 +29,20 @@ async function main() {
     process.exit(1);
   }
 
+  const tags = process.env.TAG ? [process.env.TAG] : SEED_DATA_TYPES;
+  const groupConcurrency = process.env.GROUP_CONCURRENCY ? Number(process.env.GROUP_CONCURRENCY) : undefined;
+  const wavePauseMs = process.env.WAVE_PAUSE_MS ? Number(process.env.WAVE_PAUSE_MS) : undefined;
+  const startupJitterMs = process.env.STARTUP_JITTER_MS ? Number(process.env.STARTUP_JITTER_MS) : 0;
+
+  if (startupJitterMs > 0) {
+    const delay = Math.random() * startupJitterMs;
+    console.log(`Startup jitter: waiting ${delay.toFixed(0)}ms before starting...`);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+
   const results: TagResult[] = [];
-  for (const tag of SEED_DATA_TYPES) {
-    results.push(await runAutomation({ baseUrl, tag, excelPath, jsonPath }));
+  for (const tag of tags) {
+    results.push(await runAutomation({ baseUrl, tag, excelPath, jsonPath, groupConcurrency, wavePauseMs }));
   }
 
   printTimingTable(results);
