@@ -1780,7 +1780,19 @@ export class WebserviceUtils {
     };
     const response = await this.runWebServiceRequest(body, 'InsuranceContract/SaveInsuranceContract', 'PUT');
     const parsed = JSON.parse(response.raw);
-    this.responseCache.put(Keys.KEY_INSURANCE_CONTRACT_ID, parsed.insuranceContractId);
+
+    // Under concurrent load, two rows can both see "contract doesn't exist yet" and both try to
+    // create it - the "losing" request's response doesn't carry a usable insuranceContractId. Rather
+    // than crash, fall back to looking the contract up by name (the winner's write should be visible
+    // by now, or shortly after via pollUntilFound) and use that ID instead.
+    const insuranceContractId =
+      parsed?.insuranceContractId ??
+      (await this.pollUntilFound(() => this.retrieveContracts(insuranceContractName)))?.insuranceContractId;
+
+    if (insuranceContractId == null) {
+      throw new Error(`saveContract: no insuranceContractId returned or found for "${insuranceContractName}"`);
+    }
+    this.responseCache.put(Keys.KEY_INSURANCE_CONTRACT_ID, insuranceContractId);
   }
 
   /**
@@ -1810,7 +1822,7 @@ export class WebserviceUtils {
       body = updateField(body, 'transactionCodeId', await this.getTransactionCodeIdByType(transactionCodeName));
     }
 
-    await this.runWebServiceRequest(body, 'InsuranceContract/SaveInsuranceContractPostingOption', 'PUT');
+    await this.runWebServiceRequestWithRetryOnTransientFailure(body, 'InsuranceContract/SaveInsuranceContractPostingOption', 'PUT');
   }
 
   /**
@@ -2047,8 +2059,9 @@ export class WebserviceUtils {
   /**
    * Port of ReUsableWebserviceUtils.updateFeeSchedule (FeeSchedule/Update, POST). Retries on a
    * 409 Constraint Conflict - two rows updating overlapping CPT codes for the same organization
-   * in the same concurrent batch can collide, distinct from a genuine pre-existing duplicate
-   * procedure name (which fails identically on /FeeSchedule/Insert and is not retried here).
+   * in the same concurrent batch can collide. The similarly-shaped "duplicate procedure names"
+   * 409 from /FeeSchedule/Insert is handled separately in insertFeeScheduleRecord (falls back to
+   * the entry a concurrent row already created, rather than retrying this call).
    */
   protected async updateFeeSchedule(feeScheduleJson: Record<string, unknown>): Promise<void> {
     await this.runWebServiceRequestWithRetryOnTransientFailure(feeScheduleJson, 'FeeSchedule/Update', 'POST', {
@@ -2086,7 +2099,26 @@ export class WebserviceUtils {
     insertBody = updateField(insertBody, 'revenueCodeId', '248');
     insertBody = updateField(insertBody, 'typeOfBill', '0831');
 
-    const insertResponse = await this.insertFeeScheduleApi(insertBody);
+    let insertResponse: Record<string, unknown>;
+    try {
+      insertResponse = await this.insertFeeScheduleApi(insertBody);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (!/\(status 409\) body=You cannot have duplicate procedure names\./.test(message)) {
+        throw err;
+      }
+      // A concurrent row already inserted this CPT code's fee schedule between our existence
+      // check (in insertFeeSchedule) and this insert - use the entry it created instead of failing.
+      const existingSchedules = await this.getAllFeeSchedules();
+      const existing = existingSchedules.find((fs) => {
+        const cptProcedure = fs.cptProcedure as Record<string, unknown> | undefined;
+        return cptProcedure?.cptCode === cptCode;
+      });
+      if (!existing) {
+        throw new Error(`insertFeeScheduleRecord: duplicate-name conflict for "${cptCode}" but no existing entry found`);
+      }
+      insertResponse = existing;
+    }
 
     cptCodeObject.procedureDisplayName = `${cptCodeObject.cptCode}; ${cptCodeObject.cptDescription}`;
 
@@ -3047,12 +3079,18 @@ export class WebserviceUtils {
   /** Port of ReUsableWebserviceUtils.getScheduledProcedures (ScheduledCaseProcedure/GetScheduledProcedures/{caseSummaryId}/false, GET). */
   protected async getScheduledProcedures(caseSummaryId: string): Promise<Record<string, unknown>[]> {
     // The case's procedures may not be visible yet immediately after createCaseSummary
-    // under concurrent load - retry briefly before treating it as genuinely empty.
-    const procedures = await this.pollUntilFound(async () => {
-      const response = await this.runWebServiceRequest('', `ScheduledCaseProcedure/GetScheduledProcedures/${caseSummaryId}/false`, 'GET');
-      const result = Array.isArray(response.data) ? (response.data as Record<string, unknown>[]) : JSON.parse(response.raw);
-      return result.length > 0 ? result : undefined;
-    });
+    // under concurrent load - retry before treating it as genuinely empty. Wider than
+    // pollUntilFound's default (5x/2s) since this specific lookup was still seeing
+    // "no performed items" failures within that window under heavier concurrent load.
+    const procedures = await this.pollUntilFound(
+      async () => {
+        const response = await this.runWebServiceRequest('', `ScheduledCaseProcedure/GetScheduledProcedures/${caseSummaryId}/false`, 'GET');
+        const result = Array.isArray(response.data) ? (response.data as Record<string, unknown>[]) : JSON.parse(response.raw);
+        return result.length > 0 ? result : undefined;
+      },
+      8,
+      3000
+    );
     return procedures ?? [];
   }
 
