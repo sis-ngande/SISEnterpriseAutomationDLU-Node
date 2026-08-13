@@ -12,7 +12,7 @@ export const DEFAULT_EXCEL_PATH = path.resolve(__dirname, '../src/seeddata/seedD
 // TestCase consumes), matching the Java original's guarantee that everything runs strictly
 // line-by-line with no concurrency. Grouping by TestCase and running each group's rows
 // sequentially preserves that guarantee; different groups still run concurrently for throughput.
-export const DEFAULT_GROUP_CONCURRENCY = 30; // testCase groups run per wave
+export const DEFAULT_GROUP_CONCURRENCY = 10; // testCase groups run per wave
 export const DEFAULT_WAVE_PAUSE_MS = 5000; // breathing gap between waves, so the backend/DB isn't under sustained non-stop load
 
 export interface RunOptions {
