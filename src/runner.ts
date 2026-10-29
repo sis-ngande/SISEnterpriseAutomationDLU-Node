@@ -15,6 +15,13 @@ export const DEFAULT_EXCEL_PATH = path.resolve(__dirname, '../src/seeddata/seedD
 export const DEFAULT_GROUP_CONCURRENCY = 10; // testCase groups run per wave
 export const DEFAULT_WAVE_PAUSE_MS = 5000; // breathing gap between waves, so the backend/DB isn't under sustained non-stop load
 
+// Matches the Java original's default `commaSeparatedSeedDataSheets` suite parameter
+// (ConfigFile.properties / DLUExecution.xml both set this to "SeedData"). The workbook also
+// contains backup/draft/staging sheets (SeedData_Cypress Backup, SeedData_ForReference_InDraft,
+// etc.) that Java never runs and that carry known-bad placeholder data - only process the sheet(s)
+// explicitly requested, never every sheet in the workbook.
+export const DEFAULT_SHEET_NAMES = ['SeedData'];
+
 export interface RunOptions {
   baseUrl: string;
   tag: string;
@@ -23,6 +30,7 @@ export interface RunOptions {
   templatesDir?: string;
   groupConcurrency?: number;
   wavePauseMs?: number;
+  sheetNames?: string[];
   onEvent?: (event: RunEvent) => void;
 }
 
@@ -119,13 +127,17 @@ export async function runAutomation(options: RunOptions): Promise<TagResult> {
     templatesDir = DEFAULT_TEMPLATES_DIR,
     groupConcurrency = DEFAULT_GROUP_CONCURRENCY,
     wavePauseMs = DEFAULT_WAVE_PAUSE_MS,
+    sheetNames = DEFAULT_SHEET_NAMES,
     onEvent,
   } = options;
 
   const startedAt = Date.now();
 
   const processor = await WebServiceSeedDataProcessor.create(excelPath, jsonPath);
-  const seedData = await processor.getAllSeedDataForType(tag);
+  const seedData: SeedData[] = [];
+  for (const sheetName of sheetNames) {
+    seedData.push(...(await processor.getAllSeedDataForSheet(sheetName, tag)));
+  }
   const groups = groupByTestCase(seedData);
   const groupEntries = Array.from(groups.entries());
 

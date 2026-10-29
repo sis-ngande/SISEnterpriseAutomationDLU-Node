@@ -20,6 +20,10 @@ export class WebServiceSeedDataProcessor {
     return new WebServiceSeedDataProcessor(excelParser, sisTestDataExcelParser);
   }
 
+  getSheetNames(): string[] {
+    return this.excelParser.getAllSheets();
+  }
+
   async getAllSeedDataForType(seedDataType: string): Promise<SeedData[]> {
     const listSeedData: SeedData[] = [];
     for (const sheetName of this.excelParser.getAllSheets()) {

@@ -1,6 +1,7 @@
 import path from 'path';
 import express, { Request, Response } from 'express';
-import { runAutomation, RunEvent } from '../runner';
+import { runAutomation, RunEvent, DEFAULT_EXCEL_PATH, DEFAULT_SHEET_NAMES } from '../runner';
+import { WebServiceSeedDataProcessor } from '../seeddata/webServiceSeedDataProcessor';
 
 const PORT = Number(process.env.PORT ?? 3000);
 
@@ -45,13 +46,25 @@ app.get('/api/events', (req: Request, res: Response) => {
   req.on('close', () => sseClients.delete(res));
 });
 
+app.get('/api/sheets', async (_req: Request, res: Response) => {
+  try {
+    const processor = await WebServiceSeedDataProcessor.create(DEFAULT_EXCEL_PATH);
+    res.json({ sheets: processor.getSheetNames(), defaults: DEFAULT_SHEET_NAMES });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
 app.post('/api/run', (req: Request, res: Response) => {
-  const { baseUrl, tag } = req.body ?? {};
+  const { baseUrl, tag, sheetNames } = req.body ?? {};
   if (!baseUrl || typeof baseUrl !== 'string') {
     return res.status(400).json({ error: 'baseUrl is required' });
   }
   if (!tag || typeof tag !== 'string') {
     return res.status(400).json({ error: 'tag is required' });
+  }
+  if (!Array.isArray(sheetNames) || sheetNames.length === 0 || !sheetNames.every((s) => typeof s === 'string')) {
+    return res.status(400).json({ error: 'select at least one sheet' });
   }
   if (state === 'running') {
     return res.status(409).json({ error: 'A run is already in progress' });
@@ -65,6 +78,7 @@ app.post('/api/run', (req: Request, res: Response) => {
   runAutomation({
     baseUrl,
     tag,
+    sheetNames,
     onEvent: (event) => broadcast(event),
   })
     .then(() => {

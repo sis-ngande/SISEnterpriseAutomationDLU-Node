@@ -32,6 +32,9 @@ async function main() {
   const tags = process.env.TAG ? [process.env.TAG] : SEED_DATA_TYPES;
   const groupConcurrency = process.env.GROUP_CONCURRENCY ? Number(process.env.GROUP_CONCURRENCY) : undefined;
   const wavePauseMs = process.env.WAVE_PAUSE_MS ? Number(process.env.WAVE_PAUSE_MS) : undefined;
+  const sheetNames = process.env.SHEET_NAMES
+    ? process.env.SHEET_NAMES.split(',').map((s) => s.trim()).filter(Boolean)
+    : undefined;
   const startupJitterMs = process.env.STARTUP_JITTER_MS ? Number(process.env.STARTUP_JITTER_MS) : 0;
 
   if (startupJitterMs > 0) {
@@ -42,7 +45,7 @@ async function main() {
 
   const results: TagResult[] = [];
   for (const tag of tags) {
-    results.push(await runAutomation({ baseUrl, tag, excelPath, jsonPath, groupConcurrency, wavePauseMs }));
+    results.push(await runAutomation({ baseUrl, tag, excelPath, jsonPath, groupConcurrency, wavePauseMs, sheetNames }));
   }
 
   printTimingTable(results);

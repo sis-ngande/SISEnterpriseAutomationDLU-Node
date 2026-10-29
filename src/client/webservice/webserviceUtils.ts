@@ -2050,29 +2050,34 @@ export class WebserviceUtils {
     return Array.isArray(response.data) ? (response.data as Record<string, unknown>[]) : JSON.parse(response.raw);
   }
 
-  /** Port of ReUsableWebserviceUtils.insertFeeSchedule(String) (/FeeSchedule/Insert, POST). */
-  protected async insertFeeScheduleApi(feeScheduleJson: Record<string, unknown>): Promise<Record<string, unknown>> {
-    const response = await this.runWebServiceRequest(feeScheduleJson, '/FeeSchedule/Insert', 'POST');
-    return JSON.parse(response.raw);
+  /**
+   * Fee-schedule writes 500 (empty body) unless the CPT procedure's record lock is held
+   * (recordLockTypeId 34, objectId = cptProcedureId) - matching the UI's own
+   * RequestLock -> save -> ReleaseLock sequence. Locks are session-scoped, so the release
+   * must happen on this same session.
+   */
+  private async withFeeScheduleLock<T>(cptProcedureId: unknown, fn: () => Promise<T>): Promise<T> {
+    const recordLock = { recordLockTypeId: 34, objectId: Number(cptProcedureId), organizationId: null };
+    await this.runWebServiceRequest(recordLock, 'Security/RecordLock/RequestLock', 'POST');
+    try {
+      return await fn();
+    } finally {
+      await this.runWebServiceRequest(recordLock, 'Security/RecordLock/ReleaseLock', 'POST').catch(() => undefined);
+    }
   }
 
-  /**
-   * Port of ReUsableWebserviceUtils.updateFeeSchedule (FeeSchedule/Update, POST). Retries on a
-   * 409 Constraint Conflict - two rows updating overlapping CPT codes for the same organization
-   * in the same concurrent batch can collide. The similarly-shaped "duplicate procedure names"
-   * 409 from /FeeSchedule/Insert is handled separately in insertFeeScheduleRecord (falls back to
-   * the entry a concurrent row already created, rather than retrying this call).
-   */
-  protected async updateFeeSchedule(feeScheduleJson: Record<string, unknown>): Promise<void> {
-    await this.runWebServiceRequestWithRetryOnTransientFailure(feeScheduleJson, 'FeeSchedule/Update', 'POST', {
-      isTransient: (message) => /\(status 409\) body=Constraint Conflict/.test(message),
+  /** Creates a fee schedule via /facility/business/fee-schedules (POST), which replaced the old /FeeSchedule/Insert. */
+  protected async insertFeeScheduleApi(feeScheduleJson: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.withFeeScheduleLock(feeScheduleJson.cptProcedureId, async () => {
+      const response = await this.runWebServiceRequest(feeScheduleJson, '/facility/business/fee-schedules', 'POST');
+      return JSON.parse(response.raw);
     });
   }
 
   /**
-   * Port of ReUsableWebserviceUtils.insertFeeScheduleRecord. Inserts a bare
-   * fee-schedule record for cptCode, then updates it with the amount/status
-   * (matching the Java original's insert-then-update two-step flow).
+   * Port of ReUsableWebserviceUtils.insertFeeScheduleRecord. The Java original inserted a bare
+   * record then set amount/status via FeeSchedule/Update; /facility/business/fee-schedules takes
+   * amount and status up front (as the UI's own request does), so this is a single create call.
    */
   protected async insertFeeScheduleRecord(cptCode: string, amount: number, billableStatus: string): Promise<void> {
     const cptProcedures = await this.getCptCodes(cptCode);
@@ -2081,64 +2086,38 @@ export class WebserviceUtils {
       throw new Error(`insertFeeScheduleRecord: no CPT procedure found for code "${cptCode}"`);
     }
 
-    let insertBody = this.templates.load<Record<string, unknown>>('insertFeeSchedule.json');
     const procedureDisplayName = `${cptCode}; ${cptCodeObject.cptDescription}`;
-    insertBody = updateField(insertBody, 'feeScheduleHistoryId', 0);
-    insertBody = updateField(insertBody, 'feeScheduleRootId', 0);
+    cptCodeObject.procedureDisplayName = `${cptCodeObject.cptCode}; ${cptCodeObject.cptDescription}`;
+
+    let insertBody = this.templates.load<Record<string, unknown>>('insertFeeSchedule.json');
     insertBody = updateField(insertBody, 'feeScheduleId', 0);
     insertBody = updateField(insertBody, 'procedure', cptCodeObject.cptDescription);
-    insertBody = updateField(insertBody, 'status', null);
-    insertBody = updateField(insertBody, 'cptProcedure', cptCodeObject);
-    insertBody = updateField(insertBody, 'amount', null);
     insertBody = updateField(insertBody, 'cptProcedureId', cptCodeObject.cptProcedureId);
-    insertBody = updateField(insertBody, 'effectiveDate', null);
+    insertBody = updateField(insertBody, 'cptProcedure', cptCodeObject);
     insertBody = updateField(insertBody, 'procedureDisplayName', procedureDisplayName);
-    insertBody = updateField(insertBody, 'modifiedProcedureDescription', null);
+    insertBody = updateField(insertBody, 'modifiedProcedureDescription', procedureDisplayName);
+    insertBody = updateField(insertBody, 'status', billableStatus);
+    insertBody = updateField(insertBody, 'followUpDays', '30');
+    insertBody = updateField(insertBody, 'amount', amount);
+    // effectiveDate is stamped by the server, and the UI's request doesn't send it.
+    delete insertBody.effectiveDate;
+    insertBody = updateField(insertBody, 'feeScheduleHistoryId', 0);
+    insertBody = updateField(insertBody, 'feeScheduleRootId', 0);
     insertBody = updateField(insertBody, 'activeTf', true);
     insertBody = updateField(insertBody, 'isIncludeStateReportTf', true);
-    insertBody = updateField(insertBody, 'revenueCodeId', '248');
+    insertBody = updateField(insertBody, 'revenueCodeId', 248);
     insertBody = updateField(insertBody, 'typeOfBill', '0831');
 
-    let insertResponse: Record<string, unknown>;
     try {
-      insertResponse = await this.insertFeeScheduleApi(insertBody);
+      await this.insertFeeScheduleApi(insertBody);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      // A concurrent row already inserted this CPT code's fee schedule between our existence
+      // check (in insertFeeSchedule) and this insert - that entry already covers it.
       if (!/\(status 409\) body=You cannot have duplicate procedure names\./.test(message)) {
         throw err;
       }
-      // A concurrent row already inserted this CPT code's fee schedule between our existence
-      // check (in insertFeeSchedule) and this insert - use the entry it created instead of failing.
-      const existingSchedules = await this.getAllFeeSchedules();
-      const existing = existingSchedules.find((fs) => {
-        const cptProcedure = fs.cptProcedure as Record<string, unknown> | undefined;
-        return cptProcedure?.cptCode === cptCode;
-      });
-      if (!existing) {
-        throw new Error(`insertFeeScheduleRecord: duplicate-name conflict for "${cptCode}" but no existing entry found`);
-      }
-      insertResponse = existing;
     }
-
-    cptCodeObject.procedureDisplayName = `${cptCodeObject.cptCode}; ${cptCodeObject.cptDescription}`;
-
-    let updateBody = this.templates.load<Record<string, unknown>>('updateFeeSchedule.json');
-    updateBody = updateField(updateBody, 'feeScheduleId', Number(insertResponse.feeScheduleId));
-    updateBody = updateField(updateBody, 'procedure', cptCodeObject.cptDescription);
-    updateBody = updateField(updateBody, 'cptProcedureId', cptCodeObject.cptProcedureId);
-    updateBody = updateField(updateBody, 'cptProcedure', cptCodeObject);
-    updateBody = updateField(updateBody, 'procedureDisplayName', cptCodeObject.procedureDisplayName);
-    updateBody = updateField(updateBody, 'modifiedProcedureDescription', procedureDisplayName);
-    updateBody = updateField(updateBody, 'effectiveDate', `${addDate('today', 'yyyy-MM-dd')}T00:00:00+00:00`);
-    updateBody = updateField(updateBody, 'feeScheduleHistoryId', Number(insertResponse.feeScheduleHistoryId));
-    updateBody = updateField(updateBody, 'feeScheduleRootId', Number(insertResponse.feeScheduleRootId));
-    updateBody = updateField(updateBody, 'activeTf', true);
-    updateBody = updateField(updateBody, 'amount', amount);
-    updateBody = updateField(updateBody, 'status', billableStatus);
-    updateBody = updateField(updateBody, 'revenueCodeId', '248');
-    updateBody = updateField(updateBody, 'typeOfBill', '0831');
-
-    await this.updateFeeSchedule(updateBody);
   }
 
   /** Port of ReUsableWebserviceUtils.getWorklistArea. Returns 0 for an unrecognized worklistType. */
